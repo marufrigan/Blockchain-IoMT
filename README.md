@@ -1,77 +1,75 @@
-# Post-Quantum Mutual Authentication Performance Simulation
+The Scyther tool repository
+===========================
 
-This Python script simulates and evaluates the performance of a Post-Quantum Mutual Authentication (PQC-MFA) scheme using Kyber-512 (Lattice-based Cryptography) for IoMT (Internet of Medical Things) security.
+This README describes the organization of the repository of the Scyther
+tool for security protocol analysis. Its intended audience are
+interested users and future developers of the Scyther tool, as well as
+protocol modelers. For installation, usage instructions, and pre-built binaries of the
+Scyther tool see:
+<https://cispa.saarland/group/cremers/scyther/index.html>.
 
-## Features
+Installing from source
+----------------------
 
-- **Key Generation**: Simulates generating public/private keys for Patient and Server using Kyber-512
-- **Authentication Handshake**: Simulates the complete mutual authentication data exchange (Encapsulation/Decapsulation)
-- **Performance Metrics**: Measures computation time (ms) and communication cost (bytes)
-- **Visualization**: Generates bar charts comparing PQC-MFA (Kyber) vs Standard ECC
+We use Linux during the development of Scyther, but development on
+Windows and MAC OS X should be equally feasible. Note that the below
+instructions are written from a Linux/Ubuntu perspective, and probably
+need modifications for other platforms.
 
-## Installation
+Scyther is written partly in Python 3 (for the GUI, using wxPython) and
+partly in C (for the backend). 
 
-### Option 1: Using liboqs-python (Recommended for Real Measurements)
+In order to run the tool from a repository checkout, it is required to
+compile the C sources into a working binary for the backend.  The
+simplest way to achieve this is to run the `build.sh` script in the
+`./src` directory. This script compiles a binary version of the tool on
+the native platform. Thus, in the Linux case, it should produce
+`./src/scyther-linux`. This file is automatically copied to the related
+directory under `./gui`, and if successful you can attempt to run
+`./gui/scyther-gui.py` to use the graphical user interface.
 
-```bash
-pip install -r requirements.txt
-```
+The build process depends on the following
+(Debian/Ubuntu) packages:
 
-**Note**: The `oqs` package requires the Open Quantum Safe library to be installed. For detailed installation instructions, visit: https://github.com/open-quantum-safe/liboqs-python
+  * `cmake`
+  * `build-essential`
+  * `flex`
+  * `bison`
+  * `gcc-multilib`
+  * `python3-minimal`
 
-### Option 2: Simulation Mode (No External Dependencies)
+If you are using Ubuntu, installing these may be as simple as running
 
-If `liboqs-python` is not available, the script will automatically use a simulation mode with realistic Kyber-512 values based on specifications.
+`sudo apt-get install cmake build-essential flex bison gcc-multilib python3-minimal`
 
-**Minimum requirements for simulation mode:**
-```bash
-pip install matplotlib numpy
-```
+In case you also want to be able to compile Windows binaries from Linux,
+you also need:
 
-## Usage
+  * `i686-w64-mingw32`
 
-Simply run the script:
+Note that welcome all contributions, e.g., further protocol models. Just send
+us a pull request.
 
-```bash
-python main.py
-```
+Manual
+------
 
-The script will:
-1. Run 100 iterations of the authentication handshake
-2. Calculate average performance metrics
-3. Generate comparison bar charts
-4. Save the chart as `pqc_mfa_performance_comparison.png`
+We are currently rewriting the manual. The current (incomplete) snapshot
+of the manual can be found in the following location:
 
-## Output
+  * [./gui/scyther-manual.pdf](gui/scyther-manual.pdf)
 
-The script provides:
 
-1. **Console Output**:
-   - Average computation times (KeyGen, Encaps, Decaps) in milliseconds
-   - Communication costs (Public Key and Ciphertext sizes) in bytes
-   - Standard deviations for statistical accuracy
+Protocol Models
+---------------
 
-2. **Visualization**:
-   - Bar chart comparing computation times (PQC-MFA vs ECC)
-   - Bar chart comparing communication costs (PQC-MFA vs ECC)
-   - Saved as high-resolution PNG (300 DPI) for publication
+The protocol models have the extension `.spdl` and can be found in the following directories:
 
-## Metrics Explained
+  * [./gui/Protocols](gui/Protocols), containing the officially released models, and
+  * [./testing](testing), containing models currently under development.
 
-- **KeyGen Time**: Time to generate public/private key pair
-- **Encaps Time**: Time for encapsulation (creating ciphertext and shared secret)
-- **Decaps Time**: Time for decapsulation (recovering shared secret)
-- **Public Key Size**: Size of the public key in bytes
-- **Ciphertext Size**: Size of the ciphertext in bytes
+License
+-------
 
-## For Research Publication
+Currently these Scyther sources are licensed under the GPL 2, as indicated in
+the source code. Contact Cas Cremers if you have any questions.
 
-For accurate real-world measurements in your research paper:
-1. Install `liboqs-python` following the official documentation
-2. Run the script with `liboqs` available
-3. The script will use actual Kyber-512 implementations for precise measurements
-
-## References
-
-- Kyber: A CCA-secure module-lattice-based KEM (https://pq-crystals.org/kyber/)
-- Open Quantum Safe: https://openquantumsafe.org/
