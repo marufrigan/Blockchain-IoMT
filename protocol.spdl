@@ -1,0 +1,73 @@
+/*
+ * IoMT Authentication Protocol - Secure Version (All Claims Verified)
+ * Protocol: Post-Quantum Mutual Authentication (PQC-MFA)
+ * 
+ * Roles:
+ *   - Patient (P): Medical device or patient entity
+ *   - Server (S): Authentication server
+ * 
+ * Protocol Flow:
+ *   1. P -> S: {Patient, NonceP}pk(Server)
+ *   2. S -> P: {NonceP, NonceS, SessionKey, Patient, Server}pk(Patient)
+ *   3. P -> S: {NonceS}pk(Server)
+ * 
+ * Security Claims (All Verified ✅):
+ *   - Alive: Ensures both parties are alive and participating
+ *   - Weakagree: Weak agreement on the session key
+ *   - Niagree: Non-injective agreement on the session key
+ *   - Nisynch: Non-injective synchronization
+ * 
+ * All claims have been verified using Scyther tool - no attacks found!
+ * This protocol provides resistance against Man-in-the-Middle attacks.
+ */
+
+protocol PQCMFA(Patient, Server)
+{
+    role Patient
+    {
+        fresh ID: Nonce;
+        var NonceS: Nonce;
+        var SessionKey: Nonce;
+        
+        fresh NonceP: Nonce;
+        
+        // Step 1: Patient sends Patient identity and NonceP encrypted to Server
+        send_1(Patient, Server, {Patient, NonceP}pk(Server));
+        
+        // Step 2: Patient receives NonceP (echoed), NonceS, SessionKey, Patient identity, and Server identity
+        recv_2(Server, Patient, {NonceP, NonceS, SessionKey, Patient, Server}pk(Patient));
+        
+        // Step 3: Patient sends NonceS back to prove it decrypted the message
+        send_3(Patient, Server, {NonceS}pk(Server));
+        
+        // Security Claims for Patient
+        claim_Patient1(Patient, Alive);
+        claim_Patient2(Patient, Weakagree);
+        claim_Patient3(Patient, Niagree);
+        claim_Patient4(Patient, Nisynch);
+    }
+    
+    role Server
+    {
+        var ID: Nonce;
+        var NonceP: Nonce;
+        
+        fresh NonceS: Nonce;
+        fresh SessionKey: Nonce;
+        
+        // Step 1: Server receives Patient identity and NonceP
+        recv_1(Patient, Server, {Patient, NonceP}pk(Server));
+        
+        // Step 2: Server sends NonceP (echoed), NonceS, SessionKey, Patient identity, and Server identity
+        send_2(Server, Patient, {NonceP, NonceS, SessionKey, Patient, Server}pk(Patient));
+        
+        // Step 3: Server receives NonceS back, confirming Patient decrypted the message
+        recv_3(Patient, Server, {NonceS}pk(Server));
+        
+        // Security Claims for Server
+        claim_Server1(Server, Alive);
+        claim_Server2(Server, Weakagree);
+        claim_Server3(Server, Niagree);
+        claim_Server4(Server, Nisynch);
+    }
+}

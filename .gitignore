@@ -1,0 +1,14 @@
+.DS_Store
+.AppleDouble
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.log

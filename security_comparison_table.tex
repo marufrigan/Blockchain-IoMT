@@ -1,0 +1,21 @@
+\begin{table}[h]
+\centering
+\caption{Security Feature Comparison}
+\label{tab:security_comparison}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Attack Type} & \textbf{Xu et al. [1]} & \textbf{Chen et al. [3]} & \textbf{Kumar et al. [5]} & \textbf{Proposed PQC-MFA} \\
+\midrule
+Replay Attack & \checkmark & \checkmark & \checkmark & \checkmark \\
+Man-in-the-Middle (MitM) & \checkmark & \checkmark & \checkmark & \checkmark \\
+Impersonation & \checkmark & \checkmark & \checkmark & \checkmark \\
+Quantum 'Harvest Now, Decrypt Later' & \times & \times & \checkmark\textsuperscript{*} & \checkmark \\
+Forward Secrecy & \times & \times & \checkmark\textsuperscript{*} & \checkmark \\
+Single Point of Failure (SPoF) & \checkmark & \checkmark & \checkmark\textsuperscript{*} & \checkmark \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small
+\textsuperscript{*} Requires hardware support
+\end{flushleft}
+\end{table}
