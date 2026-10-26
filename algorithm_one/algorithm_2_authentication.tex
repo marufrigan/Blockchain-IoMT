@@ -1,0 +1,19 @@
+% Algorithm 2 only — \input{algorithm_2_authentication}
+\begin{algorithm}[!t]
+\caption{Authentication Phase (Mutual)}
+\label{alg:authentication}
+\begin{algorithmic}[1]
+\Require $\mathcal{D}$ registered; $\mathcal{S}$ holds or retrieves $pk_{\mathcal{D}}^{\mathrm{sig}}$ (via blockchain).
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{AUTH\text{-}REQ},\, ID_{\mathcal{D}}$
+\State $\mathcal{S}$ retrieves $pk_{\mathcal{D}}^{\mathrm{sig}}$; abort if $ID_{\mathcal{D}}$ unknown or revoked
+\State $\mathcal{S}$ chooses fresh challenge $c \gets \{0,1\}^{\lambda}$
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{CHALLENGE},\, c$
+\State $\mathcal{D}$ computes $\sigma_{\mathcal{D}} \gets \mathrm{Sign}_{sk_{\mathcal{D}}^{\mathrm{sig}}}(c \,\|\, ID_{\mathcal{D}} \,\|\, \texttt{ctx})$
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{AUTH\text{-}RESP},\, \sigma_{\mathcal{D}}$
+\State $\mathcal{S}$ verifies $\mathrm{Verify}_{pk_{\mathcal{D}}^{\mathrm{sig}}}(\sigma_{\mathcal{D}},\, c \,\|\, ID_{\mathcal{D}} \,\|\, \texttt{ctx})$; abort if invalid
+\State \textbf{Server proof:} $\mathcal{S}$ chooses fresh $c'$; computes $\sigma_{\mathcal{S}} \gets \mathrm{Sign}_{sk_{\mathcal{S}}^{\mathrm{sig}}}(c' \,\|\, ID_{\mathcal{S}} \,\|\, \texttt{ctx})$
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{SERVER\text{-}PROOF},\, c',\, \sigma_{\mathcal{S}}$
+\State $\mathcal{D}$ verifies $\mathrm{Verify}_{pk_{\mathcal{S}}^{\mathrm{sig}}}(\sigma_{\mathcal{S}},\, c' \,\|\, ID_{\mathcal{S}} \,\|\, \texttt{ctx})$; abort if invalid
+\State \textbf{Output:} mutual authentication success; proceed to session key establishment
+\end{algorithmic}
+\end{algorithm}

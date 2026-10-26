@@ -1,0 +1,17 @@
+% Algorithm 1 only — \input{algorithm_1_registration} in your IEEE paper preamble with algorithm + algpseudocode
+\begin{algorithm}[!t]
+\caption{Registration Phase}
+\label{alg:registration}
+\begin{algorithmic}[1]
+\Require IoMT device $\mathcal{D}$ is uninitialized; server $\mathcal{S}$ reachable.
+\State $\mathcal{D}$ generates post-quantum key material:
+\State \quad ML-DSA signing key pair $(sk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{sig}})$
+\State \quad ML-KEM key pair $(sk_{\mathcal{D}}^{\mathrm{kem}},\, pk_{\mathcal{D}}^{\mathrm{kem}})$ for session establishment
+\State $\mathcal{D}$ forms identity string $ID_{\mathcal{D}}$ (e.g., device serial + tenant id)
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{REG},\, ID_{\mathcal{D}},\, pk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{kem}}$
+\State $\mathcal{S}$ validates format and policy (provisioning rules)
+\State $\mathcal{S}$ submits record $\{ID_{\mathcal{D}},\, pk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{kem}},\, t_{\mathrm{reg}}\}$ to the blockchain
+\State Blockchain appends tamper-evident registration entry; $\mathcal{S}$ stores local cache
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{REG\text{-}ACK}$ (success or failure)
+\end{algorithmic}
+\end{algorithm}

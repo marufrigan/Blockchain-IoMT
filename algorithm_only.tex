@@ -1,0 +1,27 @@
+% Add these packages to your preamble (before \begin{document}):
+% \usepackage{algorithm}
+% \usepackage{algorithmicx}
+% \usepackage{algpseudocode}
+
+\begin{algorithm}[h]
+\caption{PQC-MFA Authentication Protocol}
+\label{alg:pqc-mfa}
+\begin{algorithmic}[1]
+\State \textbf{Patient (P) Initialization:}
+\State Generate fresh nonce $N_p$ and identity $ID$
+\State \textbf{Step 1:} $P \rightarrow S$: Send $(ID, N_p)$
+\State
+\State \textbf{Server (S) Processing:}
+\State Receive $(ID, N_p)$ from Patient
+\State Generate fresh nonce $N_s$ and session key $K_{session}$
+\State Compute $H = hash(K_{session})$
+\State Sign hash: $\sigma = Sign_{sk(S)}(H)$
+\State \textbf{Step 2:} $S \rightarrow P$: Send $(N_s, \sigma)$
+\State
+\State \textbf{Patient Verification:}
+\State Receive $(N_s, \sigma)$ from Server
+\State Verify signature using $pk(S)$
+\State Extract session key $K_{session}$
+\State \textbf{Output:} Authenticated session established
+\end{algorithmic}
+\end{algorithm}

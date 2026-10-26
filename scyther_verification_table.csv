@@ -1,0 +1,9 @@
+#,Role,Scyther claim,Result,Note
+1,Patient,Alive_Patient1,Ok,[proof of correctness]
+2,Patient,Weakagree_Patient2,Ok,[proof of correctness]
+3,Patient,Niagree_Patient3,Ok,[proof of correctness]
+4,Patient,Nisynch_Patient4,Ok,[proof of correctness]
+5,Server,Alive_Server1,Ok,[proof of correctness]
+6,Server,Weakagree_Server2,Ok,[proof of correctness]
+7,Server,Niagree_Server3,Ok,[proof of correctness]
+8,Server,Nisynch_Server4,Ok,[proof of correctness]

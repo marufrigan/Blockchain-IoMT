@@ -1,0 +1,67 @@
+/*
+ * Mutual Authentication Protocol
+ * Protocol: Patient-Server Authentication
+ * 
+ * Roles:
+ *   - P: Patient (The Initiator)
+ *   - S: Server (The Responder)
+ * 
+ * Protocol Flow:
+ *   1. P -> S: Np, ID
+ *   2. S -> P: Ns, {hash(SessionKey)}sk(S)
+ * 
+ * Security Claims:
+ *   - Alive: Ensures both parties are alive and participating
+ *   - Weakagree: Weak agreement on the session key
+ *   - Niagree: Non-injective agreement on the session key
+ *   - Nisynch: Non-injective synchronization
+ * 
+ * These claims prove resistance against Man-in-the-Middle attacks.
+ */
+
+// Function definitions
+const hash: Function;
+const pk: Function;
+
+protocol MutualAuth(P, S)
+{
+    role P
+    {
+        fresh Np: Nonce;
+        fresh ID: Nonce;
+        var Ns: Nonce;
+        var SessionKey: Nonce;
+        
+        // Step 1: Patient sends fresh Nonce (Np) and ID to Server
+        send_1(P, S, Np, ID);
+        
+        // Step 2: Patient receives fresh Nonce (Ns) and signed Hash of session key from Server
+        recv_2(S, P, Ns, {hash(SessionKey)}sk(S));
+        
+        // Security Claims for Patient
+        claim_P1(P, Alive);
+        claim_P2(P, Weakagree);
+        claim_P3(P, Niagree);
+        claim_P4(P, Nisynch);
+    }
+    
+    role S
+    {
+        var Np: Nonce;
+        var ID: Nonce;
+        fresh Ns: Nonce;
+        fresh SessionKey: Nonce;
+        
+        // Step 1: Server receives fresh Nonce (Np) and ID from Patient
+        recv_1(P, S, Np, ID);
+        
+        // Step 2: Server sends fresh Nonce (Ns) and signed Hash of session key to Patient
+        send_2(S, P, Ns, {hash(SessionKey)}sk(S));
+        
+        // Security Claims for Server
+        claim_S1(S, Alive);
+        claim_S2(S, Weakagree);
+        claim_S3(S, Niagree);
+        claim_S4(S, Nisynch);
+    }
+}

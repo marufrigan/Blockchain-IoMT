@@ -1,0 +1,62 @@
+/*
+ * IoMT Authentication Protocol - Improved Version with Mutual Authentication
+ * Protocol: Post-Quantum Mutual Authentication (PQC-MFA)
+ * 
+ * This improved version adds proper mutual authentication:
+ * 1. Patient sends ID and NonceP to Server
+ * 2. Server responds with NonceS and SessionKey encrypted with Patient's public key
+ * 3. Patient confirms by sending NonceS back to Server (proves it decrypted the message)
+ * 
+ * This ensures both parties are authenticated and synchronized.
+ */
+
+protocol PQCMFA(Patient, Server)
+{
+    role Patient
+    {
+        fresh ID: Nonce;
+        var NonceS: Nonce;
+        var SessionKey: Nonce;
+        
+        fresh NonceP: Nonce;
+        
+        // Step 1: Patient sends ID and NonceP to Server
+        send_1(Patient, Server, ID, NonceP);
+        
+        // Step 2: Patient receives encrypted NonceS and SessionKey from Server
+        recv_2(Server, Patient, {NonceS, SessionKey}pk(Patient));
+        
+        // Step 3: Patient sends NonceS back to prove it decrypted the message
+        send_3(Patient, Server, {NonceS}pk(Server));
+        
+        // Security Claims for Patient
+        claim_Patient1(Patient, Alive);
+        claim_Patient2(Patient, Weakagree);
+        claim_Patient3(Patient, Niagree);
+        claim_Patient4(Patient, Nisynch);
+    }
+    
+    role Server
+    {
+        var ID: Nonce;
+        var NonceP: Nonce;
+        
+        fresh NonceS: Nonce;
+        fresh SessionKey: Nonce;
+        
+        // Step 1: Server receives ID and NonceP from Patient
+        recv_1(Patient, Server, ID, NonceP);
+        
+        // Step 2: Server sends encrypted NonceS and SessionKey to Patient
+        send_2(Server, Patient, {NonceS, SessionKey}pk(Patient));
+        
+        // Step 3: Server receives NonceS back, confirming Patient decrypted the message
+        recv_3(Patient, Server, {NonceS}pk(Server));
+        
+        // Security Claims for Server
+        claim_Server1(Server, Alive);
+        claim_Server2(Server, Weakagree);
+        claim_Server3(Server, Niagree);
+        claim_Server4(Server, Nisynch);
+    }
+}

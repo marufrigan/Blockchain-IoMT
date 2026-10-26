@@ -1,0 +1,14 @@
+% Algorithm 3 only — \input{algorithm_3_session_key}
+\begin{algorithm}[!t]
+\caption{Session Key Establishment (ML-KEM)}
+\label{alg:sessionkey}
+\begin{algorithmic}[1]
+\Require Mutual authentication completed; device holds $sk_{\mathcal{D}}^{\mathrm{kem}}$; $pk_{\mathcal{D}}^{\mathrm{kem}}$ on-chain.
+\State $\mathcal{S}$ runs $(K_{\mathrm{local}},\, ct) \gets \mathrm{Encapsulate}(pk_{\mathcal{D}}^{\mathrm{kem}})$ \Comment{encapsulate to device's ML-KEM public key}
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{KEM\text{-}CT},\, ct$
+\State $\mathcal{D}$ runs $K_{\mathrm{local}} \gets \mathrm{Decapsulate}(sk_{\mathcal{D}}^{\mathrm{kem}},\, ct)$
+\State Both derive $K_{\mathrm{sess}} \gets \mathrm{KDF}(K_{\mathrm{local}} \,\|\, \texttt{transcript})$ \Comment{bind KEM to authentication transcript}
+\State Erase ephemeral values; protect payloads with AEAD under $K_{\mathrm{sess}}$
+\State \textbf{Output:} confidential channel for medical/application data
+\end{algorithmic}
+\end{algorithm}

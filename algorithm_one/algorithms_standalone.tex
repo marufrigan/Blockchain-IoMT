@@ -1,0 +1,65 @@
+% Standalone compile: pdflatex algorithms_standalone.tex
+% Requires: algorithm, algorithmicx, algpseudocode, amsmath, amssymb
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\begin{document}
+
+\section*{Algorithms for Section 4.3 (Authentication Protocol)}
+
+\begin{algorithm}[!t]
+\caption{Registration Phase}
+\label{alg:registration}
+\begin{algorithmic}[1]
+\Require IoMT device $\mathcal{D}$ is uninitialized; server $\mathcal{S}$ reachable.
+\State $\mathcal{D}$ generates post-quantum key material:
+\State \quad ML-DSA signing key pair $(sk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{sig}})$
+\State \quad ML-KEM key pair $(sk_{\mathcal{D}}^{\mathrm{kem}},\, pk_{\mathcal{D}}^{\mathrm{kem}})$ for session establishment
+\State $\mathcal{D}$ forms identity string $ID_{\mathcal{D}}$ (e.g., device serial + tenant id)
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{REG},\, ID_{\mathcal{D}},\, pk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{kem}}$
+\State $\mathcal{S}$ validates format and policy (provisioning rules)
+\State $\mathcal{S}$ submits record $\{ID_{\mathcal{D}},\, pk_{\mathcal{D}}^{\mathrm{sig}},\, pk_{\mathcal{D}}^{\mathrm{kem}},\, t_{\mathrm{reg}}\}$ to the blockchain
+\State Blockchain appends tamper-evident registration entry; $\mathcal{S}$ stores local cache
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{REG\text{-}ACK}$ (success or failure)
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[!t]
+\caption{Authentication Phase (Mutual)}
+\label{alg:authentication}
+\begin{algorithmic}[1]
+\Require $\mathcal{D}$ registered; $\mathcal{S}$ holds or retrieves $pk_{\mathcal{D}}^{\mathrm{sig}}$ (via blockchain).
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{AUTH\text{-}REQ},\, ID_{\mathcal{D}}$
+\State $\mathcal{S}$ retrieves $pk_{\mathcal{D}}^{\mathrm{sig}}$; abort if $ID_{\mathcal{D}}$ unknown or revoked
+\State $\mathcal{S}$ chooses fresh challenge $c \gets \{0,1\}^{\lambda}$
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{CHALLENGE},\, c$
+\State $\mathcal{D}$ computes $\sigma_{\mathcal{D}} \gets \mathrm{Sign}_{sk_{\mathcal{D}}^{\mathrm{sig}}}(c \,\|\, ID_{\mathcal{D}} \,\|\, \texttt{ctx})$
+\State $\mathcal{D} \rightarrow \mathcal{S}$ : $\texttt{AUTH\text{-}RESP},\, \sigma_{\mathcal{D}}$
+\State $\mathcal{S}$ verifies $\mathrm{Verify}_{pk_{\mathcal{D}}^{\mathrm{sig}}}(\sigma_{\mathcal{D}},\, c \,\|\, ID_{\mathcal{D}} \,\|\, \texttt{ctx})$; abort if invalid
+\State \textbf{Server proof:} $\mathcal{S}$ chooses fresh $c'$; computes $\sigma_{\mathcal{S}} \gets \mathrm{Sign}_{sk_{\mathcal{S}}^{\mathrm{sig}}}(c' \,\|\, ID_{\mathcal{S}} \,\|\, \texttt{ctx})$
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{SERVER\text{-}PROOF},\, c',\, \sigma_{\mathcal{S}}$
+\State $\mathcal{D}$ verifies $\mathrm{Verify}_{pk_{\mathcal{S}}^{\mathrm{sig}}}(\sigma_{\mathcal{S}},\, c' \,\|\, ID_{\mathcal{S}} \,\|\, \texttt{ctx})$; abort if invalid
+\State \textbf{Output:} mutual authentication success; proceed to session key establishment
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[!t]
+\caption{Session Key Establishment (ML-KEM)}
+\label{alg:sessionkey}
+\begin{algorithmic}[1]
+\Require Mutual authentication completed; device holds $sk_{\mathcal{D}}^{\mathrm{kem}}$; $pk_{\mathcal{D}}^{\mathrm{kem}}$ on-chain.
+\State $\mathcal{S}$ runs $(K_{\mathrm{local}},\, ct) \gets \mathrm{Encapsulate}(pk_{\mathcal{D}}^{\mathrm{kem}})$ \Comment{encapsulate to device's ML-KEM public key}
+\State $\mathcal{S} \rightarrow \mathcal{D}$ : $\texttt{KEM\text{-}CT},\, ct$
+\State $\mathcal{D}$ runs $K_{\mathrm{local}} \gets \mathrm{Decapsulate}(sk_{\mathcal{D}}^{\mathrm{kem}},\, ct)$
+\State Both derive $K_{\mathrm{sess}} \gets \mathrm{KDF}(K_{\mathrm{local}} \,\|\, \texttt{transcript})$ \Comment{bind KEM to authentication transcript}
+\State Erase ephemeral values; protect payloads with AEAD under $K_{\mathrm{sess}}$
+\State \textbf{Output:} confidential channel for medical/application data
+\end{algorithmic}
+\end{algorithm}
+
+\end{document}
